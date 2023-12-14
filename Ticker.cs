@@ -1,38 +1,38 @@
 using System;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace QuoteAlert;
 
 public class Ticker
 {
-    [JsonPropertyName("symbol")]
+    [JsonProperty("symbol")]
     public string Symbol { get; set; }
 
-    [JsonPropertyName("shortName")]
+    [JsonProperty("shortName")]
     public string ShortName { get; set; }
 
-    [JsonPropertyName("longName")]
+    [JsonProperty("longName")]
     public string LongName { get; set; }
 
-    [JsonPropertyName("regularMarketPrice")]
-    public float RegularMarketPrice { get; set; }
+    [JsonProperty("regularMarketPrice")]
+    public decimal RegularMarketPrice { get; set; }
 
-    [JsonPropertyName("regularMarketDayHigh")]
-    public int RegularMarketDayHigh { get; set; }
+    [JsonProperty("regularMarketDayHigh")]
+    public decimal RegularMarketDayHigh { get; set; }
 
-    [JsonPropertyName("regularMarketDayLow")]
-    public int RegularMarketDayLow { get; set; }
+    [JsonProperty("regularMarketDayLow")]
+    public decimal RegularMarketDayLow { get; set; }
 
-    [JsonPropertyName("regularMarketDayRange")]
+    [JsonProperty("regularMarketDayRange")]
     public string RegularMarketDayRange { get; set; }
 
-    [JsonPropertyName("regularMarketChange")]
-    public float RegularMarketChange { get; set; }
+    [JsonProperty("regularMarketChange")]
+    public decimal RegularMarketChange { get; set; }
 
-    [JsonPropertyName("regularMarketChangePercent")]
-    public float RegularMarketChangePercent { get; set; }
+    [JsonProperty("regularMarketChangePercent")]
+    public decimal RegularMarketChangePercent { get; set; }
 
-    [JsonPropertyName("regularMarketTime")]
+    [JsonProperty("regularMarketTime")]
     public DateTime RegularMarketTime { get; set; }
 
 

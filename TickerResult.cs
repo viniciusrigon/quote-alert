@@ -1,10 +1,10 @@
 using System;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace QuoteAlert;
 
 public class TickerResult
 {
-    [JsonPropertyName("results")]
+    [JsonProperty("results")]
     public Ticker[] Quotes { get; set; }
 }
