@@ -23,8 +23,8 @@ if (args.Length != 3)
 else
 {
     string ticker = args[0];
-    decimal sellPrice = Convert.ToDecimal(args[1]);
-    decimal buyPrice = Convert.ToDecimal(args[2]);
+    decimal sellPrice = Convert.ToDecimal(args[1].Replace(",", "."));
+    decimal buyPrice = Convert.ToDecimal(args[2].Replace(",", "."));
 
     var queryQuote = $"{ticker}?range=1d&interval=1d&fundamental=false";
 

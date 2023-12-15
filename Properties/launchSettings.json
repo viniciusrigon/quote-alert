@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "quote-alert": {
+      "commandName": "Project",
+      "commandLineArgs": "PETR4\r\n\"35,5\" \r\n\"34,2\""
+    }
+  }
+}
