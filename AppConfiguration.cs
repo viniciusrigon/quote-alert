@@ -2,6 +2,7 @@ public class AppConfiguration
 {
 
     public string emaildestino { get; set; }
+    public int intervaloExecucao { get; set; }
     public SmtpConfig SmtpConfig { get; set; }
 
     public ApiConfig ApiConfig { get; set; }
@@ -14,6 +15,7 @@ public class SmtpConfig
     public string user { get; set; }
     public string password { get; set; }
     public string from { get; set; }
+    public int port { get; set; }
 }
 
 public class ApiConfig

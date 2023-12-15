@@ -1,13 +1,12 @@
 ﻿// See https://aka.ms/new-console-template for more information
-
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using Microsoft.Extensions.Configuration;
 using QuoteAlert;
 using RestSharp;
 using Newtonsoft.Json;
 using System.Net.Mail;
 using System.Net;
+using System.Globalization;
+using System.Security.AccessControl;
 
 var builder = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -18,13 +17,13 @@ var cfg = config.Get<AppConfiguration>();
 
 if (args.Length != 3)
 {
-    Console.WriteLine("Wrong number of arguments. Should be quote-alert '[TICKER]' '[sell-price]' '[buy-price]'");
+    Console.WriteLine("Para executar entre com o seguinte comando: quote-alert '[TICKER]' '[sell-price]' '[buy-price]'");
 }
 else
 {
     string ticker = args[0];
-    decimal sellPrice = Convert.ToDecimal(args[1].Replace(",", "."));
-    decimal buyPrice = Convert.ToDecimal(args[2].Replace(",", "."));
+    decimal sellPrice = Convert.ToDecimal(args[1], CultureInfo.GetCultureInfo("pt-BR"));
+    decimal buyPrice = Convert.ToDecimal(args[2], CultureInfo.GetCultureInfo("pt-BR"));
 
     var queryQuote = $"{ticker}?range=1d&interval=1d&fundamental=false";
 
@@ -47,16 +46,24 @@ else
                 {
                     if (quote.RegularMarketPrice >= sellPrice)
                     {
-                        await SendEmailSellQuote(quote, sellPrice, cfg.emaildestino);
+                        string assunto = "Aviso de venda de ação";
+                        string body = $"O preço da ação {quote.ShortName} subiu acima de {sellPrice.ToString("C2")} {Environment.NewLine} Cotação atual: {quote.RegularMarketPrice.ToString("C2")}";
+
+                        await SendEmail(assunto, body);
+                        Console.WriteLine("E-mail de venda de ação enviado.");
                     }
 
                     if (quote.RegularMarketPrice <= buyPrice)
                     {
-                        await SendEmailBuyQuote(quote, buyPrice, cfg.emaildestino);
+                        string assunto = "Aviso de compra de ação";
+                        string body = $"O preço da ação {quote.ShortName} caiu abaixo de {buyPrice.ToString("C2")} {Environment.NewLine} Cotação atual: {quote.RegularMarketPrice.ToString("C2")}";
+
+                        await SendEmail(assunto, body);
+                        Console.WriteLine("E-mail de compra de ação enviado.");
                     }
                 }
 
-                Thread.Sleep(2000);  // evitar muitas requisições por segundo
+                Thread.Sleep(cfg.intervaloExecucao);  // evitar muitas requisições por segundo
             }
             else
             {
@@ -71,48 +78,24 @@ else
 
 }
 
-async Task SendEmailBuyQuote(Ticker quote, decimal buyPrice, string emaildestino)
+async Task SendEmail(string assunto, string mensagemEmail)
 {
     MailMessage mail = new MailMessage()
     {
-        From = new MailAddress(cfg.SmtpConfig.user, "Vinicius Rigon")
+        From = new MailAddress(cfg.SmtpConfig.user, cfg.SmtpConfig.from)
     };
 
-    mail.To.Add(new MailAddress(emaildestino));
+    mail.To.Add(new MailAddress(cfg.emaildestino));
 
-    mail.Subject = "Aviso de compra de ação";
-    mail.Body = $"O preço da ação {quote.ShortName} caiu abaixo de {buyPrice.ToString("C2")} {Environment.NewLine} Cotação atual: {quote.RegularMarketPrice.ToString("C2")}";
+    mail.Subject = assunto;
+    mail.Body = mensagemEmail;
     mail.IsBodyHtml = true;
 
-    using (SmtpClient smtp = new SmtpClient(cfg.SmtpConfig.server, 587))
+    using (SmtpClient smtp = new SmtpClient(cfg.SmtpConfig.server, cfg.SmtpConfig.port))
     {
         smtp.UseDefaultCredentials = false;
         smtp.Credentials = new NetworkCredential(cfg.SmtpConfig.user, cfg.SmtpConfig.password);
         smtp.EnableSsl = true;
         await smtp.SendMailAsync(mail);
-        Console.WriteLine("E-mail de compra de ação enviado.");
-    }
-}
-
-async Task SendEmailSellQuote(Ticker quote, decimal sellPrice, string emaildestino)
-{
-    MailMessage mail = new MailMessage()
-    {
-        From = new MailAddress(cfg.SmtpConfig.user, "Vinicius Rigon")
-    };
-
-    mail.To.Add(new MailAddress(emaildestino));
-
-    mail.Subject = "Aviso de venda de ação";
-    mail.Body = $"O preço da ação {quote.ShortName} subiu acima de {sellPrice.ToString("C2")} {Environment.NewLine} Cotação atual: {quote.RegularMarketPrice.ToString("C2")}";
-    mail.IsBodyHtml = true;
-
-    using (SmtpClient smtp = new SmtpClient(cfg.SmtpConfig.server, 587))
-    {
-        smtp.UseDefaultCredentials = false;
-        smtp.Credentials = new NetworkCredential(cfg.SmtpConfig.user, cfg.SmtpConfig.password);
-        smtp.EnableSsl = true;
-        await smtp.SendMailAsync(mail);
-        Console.WriteLine("E-mail de venda de ação enviado.");
     }
 }
